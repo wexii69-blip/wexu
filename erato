@@ -1,1 +1,36 @@
+// api/send.js
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
+  // Opcjonalny klucz autoryzacyjny (zmień na swój!)
+  const authKey = req.headers['x-auth-key'] || req.query.key;
+  if (authKey !== 'tajny-klucz-ekipa-2026') {  // ← ZMIEŃ NA SWÓJ!
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const body = req.body;
+
+    // Prawdziwy webhook Discorda – tylko tutaj jest widoczny!
+    const realWebhook = 'https://discord.com/api/webhooks/1444751441108664502/JNFIJnlszDpWRKgp6PrLdE6WDdEZnQE1N7_CCUw2nXX_RJ0f3DBU3cFwebwLX5stUXvA';
+
+    const response = await fetch(realWebhook, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Discord error: ${response.status}`);
+    }
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
